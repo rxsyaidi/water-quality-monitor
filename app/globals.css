@@ -1,26 +1,92 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Water blue. Neutral by default, colour only for state (ISA-101):
+   green is the safe band, amber is "checking", red is reserved for the pump stop. */
+@theme {
+  --color-ground: #eef1f3;
+  --color-card: #ffffff;
+  --color-ink: #0f1b26;
+  --color-ink-2: #46535f;
+  --color-faint: #5d6974;
+  --color-line: #d9dee2;
+  --color-line-2: #e8ecef;
+  --color-brand: #0a5ca8;
+  --color-brand-deep: #084b8a;
+  --color-brand-tint: #e3eef8;
+  --color-safe: #1d7f45;
+  --color-safe-band: #cfe7d8;
+  --color-safe-bg: #dcefe3;
+  --color-check: #a86400;
+  --color-check-bg: #fbedd3;
+  --color-unsafe: #c42b23;
+  --color-unsafe-bg: #f8dedb;
+  --color-track: #e3e7ea;
+  --color-off: #8b969f;
+
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+    scrollbar-color: #b9c2c9 transparent;
+  }
+  body {
+    background: var(--color-ground);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  p,
+  li,
+  dd {
+    text-wrap: pretty;
+  }
+  ::selection {
+    background: #cfe0f2;
+    color: var(--color-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  a {
+    text-underline-offset: 3px;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #c3cbd1;
+    border-radius: 8px;
+    border: 2px solid var(--color-ground);
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
