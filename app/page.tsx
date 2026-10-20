@@ -90,7 +90,7 @@ export default function Home() {
 
       <main>
         {/* Hero: the real object on a plain stage, one line, one live reading */}
-        <section className="mx-auto grid max-w-6xl items-center gap-10 px-5 pt-12 pb-16 sm:px-8 md:grid-cols-[1.05fr_1fr] md:pt-20 md:pb-24">
+        <section className="mx-auto grid grid-cols-1 max-w-6xl items-center gap-10 px-5 pt-12 pb-16 sm:px-8 md:grid-cols-[1.05fr_1fr] md:pt-20 md:pb-24">
           <div>
             <p className="text-sm text-ink-2">Final year project · MEC299 · UiTM Pasir Gudang</p>
             <h1 className="mt-4 text-[2.5rem] leading-[1.06] font-semibold tracking-[-0.03em] sm:text-5xl lg:text-[3.5rem]">
@@ -116,7 +116,7 @@ export default function Home() {
               alt="The monitor: a clear acrylic box with the LCD on the front and the sensors below"
               priority
               sizes="(min-width: 768px) 40vw, 80vw"
-              className="h-[86%] w-auto object-contain"
+              className="h-[86%] w-auto max-w-full min-w-0 object-contain"
             />
             <div className="absolute right-4 bottom-4 sm:right-5 sm:bottom-5">
               <LiveChip />
@@ -127,7 +127,7 @@ export default function Home() {
         {/* How it works */}
         <section id="how" className="border-t border-line-2 bg-ground">
           <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 md:py-24">
-            <div className="grid gap-6 md:grid-cols-[1fr_1.4fr] md:gap-16">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_1.4fr] md:gap-16">
               <h2 className="text-3xl font-semibold tracking-[-0.02em] sm:text-4xl">How it works</h2>
               <p className="max-w-[40rem] text-lg leading-relaxed text-ink-2">
                 The board decides and cuts the pump. The cloud only watches, records and alerts, so a Wi‑Fi drop never
@@ -135,7 +135,7 @@ export default function Home() {
               </p>
             </div>
 
-            <ol className="mt-12 grid gap-8 md:grid-cols-3 md:gap-10">
+            <ol className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-3 md:gap-10">
               {steps.map((s, i) => (
                 <li key={s.title} className="border-t-2 border-ink pt-4">
                   <div className="flex items-baseline gap-3">
@@ -152,7 +152,7 @@ export default function Home() {
                 <h3 className="text-lg font-semibold">When pH goes too high</h3>
                 <p className="text-sm text-faint">Designed behaviour, seconds after the first high reading</p>
               </div>
-              <ol className="relative mt-8 grid gap-6 sm:grid-cols-3 lg:grid-cols-6 lg:gap-4">
+              <ol className="relative mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3 lg:grid-cols-6 lg:gap-4">
                 <div aria-hidden="true" className="absolute top-[1.65rem] right-0 left-0 hidden h-px bg-line lg:block" />
                 {timeline.map((t, i) => (
                   <li key={i} className="relative">
@@ -169,13 +169,13 @@ export default function Home() {
 
         {/* Inside the box */}
         <section id="inside" className="border-t border-line-2">
-          <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-16 sm:px-8 md:grid-cols-2 md:py-24">
+          <div className="mx-auto grid grid-cols-1 max-w-6xl items-center gap-12 px-5 py-16 sm:px-8 md:grid-cols-2 md:py-24">
             <div className="flex items-center justify-center rounded-2xl bg-ground p-8 md:order-2">
               <Image
                 src={exploded}
                 alt="Exploded view of the monitor showing the enclosure panels, board, relay, LCD and sensors"
                 sizes="(min-width: 768px) 45vw, 90vw"
-                className="h-auto max-h-[34rem] w-auto object-contain"
+                className="h-auto max-h-[34rem] w-auto max-w-full min-w-0 object-contain"
               />
             </div>
             <div>
@@ -186,7 +186,7 @@ export default function Home() {
               </p>
               <dl className="mt-8 divide-y divide-line-2 border-y border-line-2">
                 {parts.map((p) => (
-                  <div key={p.name} className="grid gap-1 py-3.5 sm:grid-cols-[11rem_1fr] sm:gap-6">
+                  <div key={p.name} className="grid grid-cols-1 gap-1 py-3.5 sm:grid-cols-[11rem_1fr] sm:gap-6">
                     <dt className="font-semibold">{p.name}</dt>
                     <dd className="text-ink-2">{p.text}</dd>
                   </div>
@@ -200,7 +200,7 @@ export default function Home() {
         <section id="specs" className="border-t border-line-2 bg-ground">
           <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 md:py-24">
             <h2 className="text-3xl font-semibold tracking-[-0.02em] sm:text-4xl">Specifications</h2>
-            <dl className="mt-10 grid gap-x-10 sm:grid-cols-2">
+            <dl className="mt-10 grid grid-cols-1 gap-x-10 sm:grid-cols-2">
               {specs.map(([k, v]) => (
                 <div key={k} className="grid grid-cols-[9rem_1fr] gap-4 border-t border-line py-4">
                   <dt className="text-ink-2">{k}</dt>
@@ -255,7 +255,7 @@ export default function Home() {
               </table>
             </div>
 
-            <div className="mt-10 grid gap-8 sm:grid-cols-3">
+            <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3">
               {[
                 ["Correct pump decisions", "out of 9 runs"],
                 ["Response time", "from a confirmed reading to relay off"],

@@ -21,7 +21,7 @@ export function LineChart({
   xLabels: string[];
 }) {
   const box = useRef<HTMLDivElement>(null);
-  const [w, setW] = useState(640);
+  const [w, setW] = useState(320);
 
   useEffect(() => {
     const el = box.current;
@@ -32,7 +32,8 @@ export function LineChart({
   }, []);
 
   const isPh = kind === "ph";
-  const [ymin, ymax] = isPh ? [6, 9.5] : [0.5, 100];
+  // pH headroom grows only when a reading needs it, so a calm trace fills the plot.
+  const [ymin, ymax] = isPh ? [6, Math.max(9, Math.ceil((Math.max(...data) + 0.15) * 4) / 4)] : [0.5, 100];
   const pl = 34, pr = 4, pt = 6, pb = 20;
   const t = (v: number) => (isPh ? (v - ymin) / (ymax - ymin) : (Math.log10(v) - Math.log10(ymin)) / (Math.log10(ymax) - Math.log10(ymin)));
   const Y = (v: number) => pt + (1 - Math.min(1, Math.max(0, t(v)))) * (height - pt - pb);
@@ -54,7 +55,7 @@ export function LineChart({
 
   return (
     <div ref={box} className="w-full">
-      <svg width={w} height={height} viewBox={`0 0 ${w} ${height}`} className="block overflow-visible" aria-hidden="true">
+      <svg width={w} height={height} viewBox={`0 0 ${w} ${height}`} className="block max-w-full overflow-visible" aria-hidden="true">
         <rect x={pl} y={Y(hi)} width={w - pl - pr} height={Y(lo) - Y(hi)} fill={C.safeFill} />
         {spans.map(([a, b]) => (
           <rect key={a} x={X(a) - step / 2} y={pt} width={X(b) - X(a) + step} height={height - pt - pb} fill={C.stop} />

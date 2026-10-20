@@ -68,7 +68,7 @@ export function Portal() {
   const stoppedFlags = m.samples.map((s) => s.stopped);
 
   return (
-    <div className="min-h-dvh lg:grid lg:grid-cols-[15rem_1fr]">
+    <div className="min-h-dvh lg:grid lg:grid-cols-[15rem_minmax(0,1fr)]">
       {/* Sidebar, laptop */}
       <aside className="sticky top-0 hidden h-dvh flex-col border-r border-line bg-card px-3 py-5 lg:flex">
         <Link href="/" className="flex min-h-11 items-center gap-2 px-2 text-[15px] font-semibold">
@@ -159,7 +159,7 @@ export function Portal() {
               <p className="mt-1 text-ink-2">{sub}</p>
             </div>
 
-            <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <Tile label="pH" hint={`limits ${phRange}`}>
                 <Reading value={fmt("ph", ph)} out={ph < LIMITS.ph.min || ph > LIMITS.ph.max} />
                 <RangeBar kind="ph" value={ph} />
@@ -207,8 +207,8 @@ export function Portal() {
           </section>
 
           {/* Readings and alarms */}
-          <div className="mt-10 grid gap-4 xl:grid-cols-[1fr_22rem]">
-            <section id="history" aria-labelledby="history-title" className="rounded-2xl border border-line bg-card p-5">
+          <div className="mt-10 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
+            <section id="history" aria-labelledby="history-title" className="min-w-0 rounded-2xl border border-line bg-card p-5">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <h2 id="history-title" className="font-semibold">
                   Last 6 minutes
@@ -302,7 +302,7 @@ export function Portal() {
             <h2 id="device-title" className="text-xl font-semibold">
               Device
             </h2>
-            <dl className="mt-4 grid gap-x-8 rounded-2xl border border-line bg-card px-5 sm:grid-cols-2">
+            <dl className="mt-4 grid grid-cols-1 gap-x-8 rounded-2xl border border-line bg-card px-5 sm:grid-cols-2">
               {[
                 ["Board", "Arduino UNO R4 WiFi"],
                 ["Connection", "Simulated in this browser"],
