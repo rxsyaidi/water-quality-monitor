@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Comp C, Timeline hero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Comp C: the last 24 hours is the hero, drawn on a full water blue ground, with the status above it
+   and a written summary below. Primary reference Apple Weather pressure + Tide Guide; WHOOP summary sentence. */
+:root{
+  --water:#0B4F8E; --water-2:#1A609F; --on-water:#FFFFFF; --on-water-2:#B9D3EC;
+  --ground:#FFFFFF; --ink:#0D1A26; --ink2:#41505E; --faint:#5A6876; --line:#DCE4EC;
+  --brand:#0A5CA8; --brand-tint:#E1ECF7;
+  --safe:#1D7F45; --safe-band:#CFE7D8; --check:#A86400; --unsafe:#C42B23;
+}
+*{box-sizing:border-box;margin:0}
+body{font-family:"IBM Plex Sans",system-ui,sans-serif;background:var(--water);color:var(--ink);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.mono{font-family:"IBM Plex Mono",monospace}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+
+.hero{color:var(--on-water);padding:54px 20px 26px;
+  --c-band:#1C5A5C; --c-grid:#2A6CAA; --c-axis:#B9D3EC; --c-line:#FFFFFF; --c-stop:#D9534B; --c-dotring:#0B4F8E; --c-gap:#08406F}
+.heroL{display:flex;flex-direction:column}
+.devrow{display:flex;gap:6px 14px;flex-wrap:wrap;align-items:center;font-size:14px;color:var(--on-water-2)}
+.devrow b{color:#fff;font-weight:600;display:flex;gap:4px;align-items:center}
+.big{display:flex;align-items:center;gap:14px;margin-top:22px;font-size:64px;font-weight:300;letter-spacing:-.03em;line-height:.95}
+.big .dot{width:14px;height:14px}
+.hero p{font-size:16px;line-height:1.45;color:#DCE9F6;margin-top:10px;max-width:36ch}
+/* abnormal states only: a solid state block, so colour appears only when something is wrong (ISA-101) */
+.alarm{background:#B3261E;border-radius:14px;padding:16px 18px;margin-top:20px}
+.alarm h1{display:flex;gap:10px;align-items:center;font-size:30px;font-weight:600;letter-spacing:-.01em}
+.alarm h1 .dot{width:12px;height:12px;background:#fff}
+.alarm p{color:#FBE3E1;margin-top:6px}
+.alarm.off{background:#33414E}
+.alarm.off p{color:#D5DEE7}
+.status{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px;padding-top:14px;border-top:1px solid #2A6CAA}
+.status dt{font-size:12.5px;color:var(--on-water-2)}
+.status dd{display:flex;gap:7px;align-items:center;font-size:15px;color:#fff;font-weight:500;margin-top:3px;margin-left:0}
+.switch{display:flex;justify-content:space-between;align-items:center;margin:24px 0 10px}
+.seg{display:inline-flex;background:#08406F;border-radius:9px;padding:3px}
+.seg span{font-size:13px;padding:5px 11px;border-radius:7px;color:var(--on-water-2);font-weight:500}
+.seg span.on{background:#fff;color:var(--water)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--on-water-2)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+
+.sheet{background:var(--ground);border-radius:22px 22px 0 0;padding:22px 20px 110px;min-height:50vh}
+.sheet h2{font-size:17px;font-weight:600}
+.summary{font-size:16px;line-height:1.55;color:var(--ink2);margin-top:8px}
+.summary b{color:var(--ink);font-weight:500}
+.rows{margin-top:22px;border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.row .k{font-size:14px;color:var(--ink2)}
+.row .v{font-size:26px;font-weight:300;letter-spacing:-.01em}
+.row .v small{font-size:13px;color:var(--faint);margin-left:3px}
+.row .st{display:flex;gap:6px;align-items:center;font-size:13.5px;color:var(--ink2)}
+.rb{position:relative;height:6px;border-radius:3px;background:#E3E8ED;margin-top:6px}
+.rb-band{position:absolute;top:0;bottom:0;background:var(--safe-band)}
+.rb-mark{position:absolute;top:-4px;width:3px;height:14px;margin-left:-1.5px;border-radius:2px;background:var(--ink)}
+.evHead{display:flex;justify-content:space-between;align-items:baseline;margin-top:28px}
+.evHead a{font-size:14px;color:var(--brand);font-weight:500}
+.events{list-style:none;padding:0;margin-top:10px}
+.events li{display:grid;grid-template-columns:50px 14px 1fr;gap:10px;padding:10px 0}
+.events time{font-size:13px;color:var(--faint);padding-top:1px}
+.events .tl{display:flex;justify-content:center;padding-top:5px;position:relative}
+.events li:not(:last-child) .tl::after{content:"";position:absolute;top:17px;bottom:-14px;width:1px;background:var(--line)}
+.events .what{font-size:15px}
+.events .what span{display:block;font-size:13.5px;color:var(--faint);margin-top:2px}
+.simnote{font-size:12.5px;color:var(--faint);margin-top:20px}
+
+.side,.topbar{display:none}
+.tabbar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 6px 26px}
+.tb{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;color:var(--faint);font-weight:500;min-width:58px}
+.tb.on{color:var(--brand)}
+
+@media (min-width:900px){
+  body{background:#F3F7FB}
+  .app{display:grid;grid-template-columns:236px minmax(0,1fr)}
+  .side{display:flex;flex-direction:column;background:#fff;border-right:1px solid var(--line);min-height:100vh;padding:18px 12px}
+  .brandmark{display:flex;gap:10px;align-items:center;font-weight:600;font-size:15px;padding:4px 8px 22px}
+  .brandmark i{width:28px;height:28px;border-radius:8px;background:var(--water);color:#fff;display:grid;place-items:center}
+  .sn{display:flex;gap:11px;align-items:center;padding:9px 10px;border-radius:8px;font-size:14.5px;color:var(--ink2);font-weight:500}
+  .sn.on{background:var(--brand-tint);color:#073F75}
+  .tabbar{display:none}
+  .main{min-width:0;padding:24px 32px 40px}
+  .hero{border-radius:18px;padding:26px 30px 22px;background:var(--water);display:grid;grid-template-columns:340px minmax(0,1fr);gap:36px}
+  .hero .status{margin-top:auto}
+  .hero .switch{margin-top:0}
+  .sheet{border-radius:18px;margin-top:16px;padding:24px 28px;min-height:0;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:40px}
+  .sheet .rows{margin-top:18px}
+  .sheet .evHead{margin-top:0}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brandmark"><i data-icon="drop" data-size="16"></i>Water Quality Monitor</div>
+    <nav data-sidenav></nav>
+  </aside>
+  <div class="main">
+    <section class="hero">
+      <div class="heroL">
+        <div class="devrow"><b>Tank 1 <span data-icon="chevron" data-size="16"></span></b><span>Simulated</span><span data-s="safe stopped">Updated 2 s ago</span><span data-s="offline">Last reading 10:12</span></div>
+        <div data-s="safe">
+          <h1 class="big"><i class="dot" style="background:#5FD08C"></i>Safe</h1>
+          <p>pH 7.21 and turbidity 1.8 NTU, both inside the limits.</p>
+        </div>
+        <div class="alarm" data-s="stopped">
+          <h1><i class="dot"></i>Pump stopped</h1>
+          <p>pH 9.02 is above the 8.5 limit. The pump restarts after 30 s back in range.</p>
+        </div>
+        <div class="alarm off" data-s="offline">
+          <h1><i class="dot"></i>Board offline</h1>
+          <p>No reading for 30 min, since 10:12. Check the board's power and Wi-Fi.</p>
+        </div>
+        <dl class="status">
+          <div><dt>Pump</dt>
+            <dd data-s="safe"><i class="dot" style="background:#5FD08C"></i>Running</dd>
+            <dd data-s="stopped"><i class="dot" style="background:#FF7A70"></i>Stopped</dd>
+            <dd data-s="offline">Unknown</dd></div>
+          <div><dt>Board</dt>
+            <dd data-s="safe stopped"><i class="dot" style="background:#5FD08C"></i>Online</dd>
+            <dd data-s="offline"><i class="dot" style="background:#9FB3C6"></i>Offline</dd></div>
+          <div><dt>Last reading</dt>
+            <dd data-s="safe stopped">2 s ago</dd>
+            <dd data-s="offline">30 min ago</dd></div>
+        </dl>
+      </div>
+      <div>
+        <div class="switch"><div class="seg"><span class="on">pH</span><span>Turbidity</span></div><div class="seg"><span>1H</span><span class="on">24H</span><span>7D</span><span>30D</span></div></div>
+        <div data-chart="ph" data-h="190"></div>
+        <div class="legend"><span><i style="background:#1C5A5C;border:1px solid #3D7E7F"></i>Safe range</span><span><i style="background:#D9534B"></i>Pump off</span><span data-s="offline"><i style="background:#08406F;border:1px solid #2A6CAA"></i>No data</span></div>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div>
+        <h2>Last 24 hours</h2>
+        <p class="summary" data-s="safe">The pump stopped <b>once</b>, at <b>14:32 yesterday</b>, when pH reached 9.02. It restarted 9 minutes later after 30 s back in range. Readings have stayed in range since.</p>
+        <p class="summary" data-s="stopped">pH started rising at <b>10:12</b> and reached <b>9.02</b> at 10:41. The board confirmed it for 2 s, then <b>stopped the pump</b>. Before that, readings stayed in range all day.</p>
+        <p class="summary" data-s="offline">The board sent its last reading at <b>10:12</b>, 30 minutes ago. Until then readings were in range, apart from <b>one pump stop</b> at 14:32 yesterday.</p>
+        <div class="rows">
+          <div class="row"><span class="k">pH</span><div><span class="v" data-s="safe offline">7.21</span><span class="v" data-s="stopped">9.02</span><div data-bar="ph"></div></div>
+            <span class="st" data-s="safe"><i class="dot" style="background:var(--safe)"></i>In range</span>
+            <span class="st" data-s="stopped"><i class="dot" style="background:var(--unsafe)"></i>Too high</span>
+            <span class="st" data-s="offline">30 min old</span></div>
+          <div class="row"><span class="k">Turbidity</span><div><span class="v" data-s="safe offline">1.8<small>NTU</small></span><span class="v" data-s="stopped">3.1<small>NTU</small></span><div data-bar="ntu"></div></div>
+            <span class="st" data-s="safe stopped"><i class="dot" style="background:var(--safe)"></i>Clear</span>
+            <span class="st" data-s="offline">30 min old</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="evHead"><h2>What the board did</h2><a href="#">All alerts</a></div>
+        <ol class="events" data-s="stopped">
+          <li><time class="mono">10:41</time><span class="tl"><i class="dot" style="background:var(--unsafe)"></i></span><div class="what">Pump stopped<span>pH 9.02 above the 8.5 limit</span></div></li>
+          <li><time class="mono">10:41</time><span class="tl"><i class="dot" style="background:var(--check)"></i></span><div class="what">Checking<span>pH above the limit, confirming for 2 s</span></div></li>
+        </ol>
+        <ol class="events" data-s="offline">
+          <li><time class="mono">10:42</time><span class="tl"><i class="dot" style="background:#7C8B99"></i></span><div class="what">Board offline<span>No reading for 30 min</span></div></li>
+          <li><time class="mono">10:12</time><span class="tl"><i class="dot" style="background:var(--safe)"></i></span><div class="what">Last reading<span>pH 7.21, turbidity 1.8 NTU</span></div></li>
+        </ol>
+        <ol class="events" data-s="safe">
+          <li><time class="mono">14:41</time><span class="tl"><i class="dot" style="background:var(--safe)"></i></span><div class="what">Pump restarted<span>Back in range for 30 s</span></div></li>
+          <li><time class="mono">14:32</time><span class="tl"><i class="dot" style="background:var(--unsafe)"></i></span><div class="what">Pump stopped<span>pH 9.02 above the 8.5 limit, off 9 min</span></div></li>
+          <li><time class="mono">14:32</time><span class="tl"><i class="dot" style="background:var(--check)"></i></span><div class="what">Checking<span>pH above the limit, confirming for 2 s</span></div></li>
+        </ol>
+        <p class="simnote">Simulated readings from the virtual board.</p>
+      </div>
+    </section>
+  </div>
+</div>
+<nav class="tabbar" data-tabbar></nav>
+<script src="shared.js"></script>
+</body>
+</html>

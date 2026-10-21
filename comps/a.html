@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Comp A, Status surface</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Comp A: the top of the screen is a solid block whose colour is the state.
+   Primary reference LARQ + Tide Guide; Starlink timeline for events; Neon console shell on laptop. */
+:root{
+  --ground:#EDF2F7; --card:#FFFFFF; --ink:#0F1B26; --ink2:#43515E; --faint:#5B6773; --line:#D6DEE6;
+  --brand:#0A5CA8; --brand-deep:#073F75; --brand-tint:#E1ECF7; --on-brand-2:#C9DDF1;
+  --safe:#1D7F45; --safe-band:#CFE7D8; --check:#A86400; --unsafe:#C42B23;
+  --c-band:#DDEFE4; --c-grid:#D6DEE6; --c-axis:#5B6773; --c-line:#0A5CA8; --c-stop:#F3C9C5; --c-dotring:#FFFFFF;
+}
+*{box-sizing:border-box;margin:0}
+body{font-family:"IBM Plex Sans",system-ui,sans-serif;background:var(--ground);color:var(--ink);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.mono{font-family:"IBM Plex Mono",monospace}
+
+/* status surface */
+.surface{background:var(--brand);color:#fff}
+.surface .meta{display:flex;gap:14px;align-items:center;font-size:13.5px;color:var(--on-brand-2)}
+.surface .meta b{color:#fff;font-weight:500}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.surface h1{font-size:36px;font-weight:600;letter-spacing:-.01em;line-height:1.1;margin-top:18px;text-wrap:balance}
+.surface p.why{font-size:16px;line-height:1.45;color:#E4EEF8;margin-top:8px;max-width:34ch}
+.lastStop{margin-top:20px;border-top:1px solid #3478B8;padding-top:14px;display:flex;flex-direction:column;gap:3px;font-size:14px;color:var(--on-brand-2)}
+.lastStop .big{font-size:17px;color:#fff;font-weight:500}
+.lastStop b{color:#fff;font-weight:500}
+
+/* readings */
+.tile{background:var(--card);border-radius:14px;padding:18px 18px 16px}
+.tile .top{display:flex;justify-content:space-between;align-items:baseline}
+.tile .name{font-size:15px;font-weight:500}
+.state{display:flex;gap:7px;align-items:center;font-size:14px;color:var(--ink2)}
+.val{font-size:46px;font-weight:300;letter-spacing:-.02em;line-height:1;margin:14px 0 14px}
+.val small{font-size:17px;font-weight:400;color:var(--faint);margin-left:4px;letter-spacing:0}
+.limits{display:flex;justify-content:space-between;font-size:12.5px;color:var(--faint);margin-top:8px}
+.rb{position:relative;height:8px;border-radius:4px;background:#E3E8ED}
+.rb-band{position:absolute;top:0;bottom:0;background:var(--safe-band)}
+.rb-mark{position:absolute;top:-5px;width:4px;height:18px;margin-left:-2px;border-radius:2px;background:var(--ink)}
+
+.sectionHead{display:flex;justify-content:space-between;align-items:baseline;margin:28px 0 12px}
+.sectionHead h2{font-size:17px;font-weight:600}
+.sectionHead a{font-size:14px;color:var(--brand);font-weight:500}
+.seg{display:inline-flex;background:#E1E8EF;border-radius:9px;padding:3px}
+.seg span{font-size:13px;padding:5px 10px;border-radius:7px;color:var(--ink2);font-weight:500}
+.seg span.on{background:#fff;color:var(--ink)}
+
+/* events timeline, Starlink style */
+.events{list-style:none;padding:0;background:var(--card);border-radius:14px;padding:6px 18px}
+.events li{display:grid;grid-template-columns:52px 14px 1fr;gap:10px;padding:13px 0;border-bottom:1px solid #E8EDF2;align-items:start}
+.events li:last-child{border-bottom:0}
+.events time{font-size:13px;color:var(--faint);padding-top:1px}
+.events .tl{position:relative;display:flex;justify-content:center;padding-top:5px}
+.events .tl .dot{position:relative;z-index:1}
+.events .what{font-size:15px;line-height:1.35}
+.events .what span{display:block;font-size:13.5px;color:var(--faint);margin-top:2px}
+.events .dur{font-size:13px;color:var(--ink2)}
+
+/* phone shell */
+.app{min-height:100vh}
+.side,.topbar{display:none}
+.surface{padding:56px 20px 26px}
+.content{padding:16px 16px 110px}
+.readings{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.chartCard{background:var(--card);border-radius:14px;padding:14px 12px 8px}
+.tabbar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 6px 26px}
+.tb{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;color:var(--faint);font-weight:500;min-width:58px}
+.tb.on{color:var(--brand)}
+.pumpRow{display:flex;justify-content:space-between;align-items:center}
+.simnote{font-size:12.5px;color:var(--faint);margin-top:18px;text-align:center}
+
+/* laptop: Neon style console */
+@media (min-width:900px){
+  .app{display:grid;grid-template-columns:236px minmax(0,1fr)}
+  .side{display:flex;flex-direction:column;background:#fff;border-right:1px solid var(--line);min-height:100vh;padding:18px 12px}
+  .brandmark{display:flex;gap:10px;align-items:center;font-weight:600;font-size:15px;padding:4px 8px 22px}
+  .brandmark i{width:28px;height:28px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center}
+  .sn{display:flex;gap:11px;align-items:center;padding:9px 10px;border-radius:8px;font-size:14.5px;color:var(--ink2);font-weight:500}
+  .sn.on{background:var(--brand-tint);color:var(--brand-deep)}
+  .tabbar{display:none}
+  .main{min-width:0}
+  .topbar{display:flex;justify-content:space-between;align-items:center;height:58px;padding:0 32px;background:#fff;border-bottom:1px solid var(--line);font-size:14px}
+  .topbar .dev{display:flex;gap:8px;align-items:center;font-weight:600}
+  .topbar .right{display:flex;gap:18px;align-items:center;color:var(--ink2)}
+  .surface{margin:24px 32px 0;border-radius:16px;padding:28px 32px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:40px;align-items:end}
+  .surface h1{font-size:40px;margin-top:14px}
+  .lastStop{margin-top:0;border-top:0;border-left:1px solid #3478B8;padding:0 0 0 28px;flex-direction:column;gap:6px}
+  .lastStop .big{font-size:22px;color:#fff;font-weight:500}
+  .content{padding:20px 32px 40px}
+  .readings{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  .split{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:16px}
+  .split .sectionHead{margin-top:24px}
+  .simnote{text-align:left}
+  .phone-only{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brandmark"><i data-icon="drop" data-size="16"></i>Water Quality Monitor</div>
+    <nav data-sidenav></nav>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <div class="dev">Tank 1 <span data-icon="chevron" data-size="16"></span></div>
+      <div class="right"><span>Simulated readings</span><span style="display:flex;gap:7px;align-items:center"><i class="dot" style="background:var(--safe)"></i>Board online</span></div>
+    </header>
+
+    <section class="surface">
+      <div>
+        <div class="meta"><b>Tank 1</b><span>Updated 2 s ago</span><span class="phone-only">Simulated</span></div>
+        <h1>Water is safe</h1>
+        <p class="why">pH and turbidity are inside the limits. The pump is running.</p>
+      </div>
+      <div class="lastStop">
+        <span>Last pump stop</span>
+        <b class="big">Yesterday 14:32, 9 min</b>
+        <span>pH reached 9.02</span>
+      </div>
+    </section>
+
+    <div class="content">
+      <div class="readings">
+        <div class="tile">
+          <div class="top"><span class="name">pH</span><span class="state"><i class="dot" style="background:var(--safe)"></i>In range</span></div>
+          <div class="val">7.21</div>
+          <div data-bar="ph"></div>
+          <div class="limits"><span>Safe 6.5 to 8.5</span><span>0 to 14</span></div>
+        </div>
+        <div class="tile">
+          <div class="top"><span class="name">Turbidity</span><span class="state"><i class="dot" style="background:var(--safe)"></i>Clear</span></div>
+          <div class="val">1.8<small>NTU</small></div>
+          <div data-bar="ntu"></div>
+          <div class="limits"><span>Safe up to 5 NTU</span><span>log scale</span></div>
+        </div>
+        <div class="tile">
+          <div class="top"><span class="name">Pump</span><span class="state"><i class="dot" style="background:var(--safe)"></i>Running</span></div>
+          <div class="val" style="font-size:30px;margin:16px 0 10px;font-weight:400">19 h 59 min</div>
+          <div class="limits" style="margin-top:0"><span>Since it restarted yesterday 14:41</span></div>
+          <div class="limits"><span>Stops 0 today, 1 in 7 days</span></div>
+        </div>
+      </div>
+
+      <div class="split">
+        <div>
+          <div class="sectionHead"><h2>pH, last 24 hours</h2><div class="seg"><span>1H</span><span class="on">24H</span><span>7D</span><span>30D</span></div></div>
+          <div class="chartCard"><div data-chart="ph" data-h="190"></div></div>
+        </div>
+        <div>
+          <div class="sectionHead"><h2>What the board did</h2><a href="#">All alerts</a></div>
+          <ol class="events">
+            <li><time class="mono">14:41</time><span class="tl"><i class="dot" style="background:var(--safe)"></i></span><div class="what">Pump restarted<span>Back in range for 30 s</span></div></li>
+            <li><time class="mono">14:32</time><span class="tl"><i class="dot" style="background:var(--unsafe)"></i></span><div class="what">Pump stopped<span>pH 9.02 above the 8.5 limit, off 9 min</span></div></li>
+            <li><time class="mono">14:32</time><span class="tl"><i class="dot" style="background:var(--check)"></i></span><div class="what">Checking<span>pH above the limit, confirming for 2 s</span></div></li>
+          </ol>
+        </div>
+      </div>
+      <p class="simnote">Simulated readings from the virtual board. Real readings appear once the board is connected.</p>
+    </div>
+  </div>
+</div>
+<nav class="tabbar" data-tabbar></nav>
+<script src="shared.js"></script>
+</body>
+</html>

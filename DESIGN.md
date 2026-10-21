@@ -1,62 +1,74 @@
-# DESIGN.md — Water blue
+# DESIGN.md — Water blue, Timeline hero
 
-The visual system for the Water Quality Monitor website and portal. Derived from the shipped code in `app/globals.css` and `components/`.
+The visual system for the Water Quality Monitor website and the signed in app. The app follows comp C, "Timeline hero" (`comps/c.html`, approved 21 Okt 2026). Derived from the shipped code: `app/globals.css` and `app/page.tsx` for the website, `app/app/app.css` and `components/app/` for the app.
 
 ## Principles
 
-1. **Neutral by default, colour only for state.** Following ISA-101 (the standard for industrial control screens), the interface is grey and white so that colour means something when it appears. Green is the safe band, amber is "checking", red is reserved for the pump stop.
-2. **Status is a dot plus a word.** Never colour alone. Every state has a plain sentence explaining why.
-3. **The reading is the hero.** Big, light, tabular numbers, with a range bar that shows where the value sits against its limits.
-4. **Honest data.** Simulated readings are labelled as simulated. Untested results say "Not run yet", never a made up number.
+1. **Neutral by default, colour only for state.** Following ISA-101 (the standard for industrial control screens), surfaces are water blue, white and grey, so colour means something when it appears. Green is safe, amber is checking or restarting, red is the pump stop, slate is offline.
+2. **Status is a dot plus a word.** Never colour alone. Every state has a plain sentence saying why.
+3. **The answer first, then the story.** The hero says what the tank is doing now; the timeline under it says what the board did and why, newest first.
+4. **Honest data.** Simulated readings say "Simulated". Untested hardware says "Not yet tested on the real hardware". Alerts say they need the app open.
+5. **Nothing is see-through.** No rgba, opacity, blur or soft shadows, so every screen prints and exports to PDF cleanly.
 
 ## Colour
 
+App tokens live on `.wq` in `app/app/app.css`. The website uses the Tailwind theme in `app/globals.css` with the same brand and state hues.
+
 | Token | Hex | Use |
 |---|---|---|
-| `ground` | `#EEF1F3` | Page background |
-| `card` | `#FFFFFF` | Cards, tiles, tables |
-| `ink` | `#0F1B26` | Primary text, range bar marker |
-| `ink-2` | `#46535F` | Secondary text |
-| `faint` | `#5D6974` | Labels, captions (passes AA on `ground`) |
-| `line` / `line-2` | `#D9DEE2` / `#E8ECEF` | Borders / row dividers |
-| `brand` / `brand-deep` | `#0A5CA8` / `#084B8A` | Links, primary button, logo / hover |
-| `brand-tint` | `#E3EEF8` | Active navigation |
-| `safe` / `safe-band` / `safe-bg` | `#1D7F45` / `#CFE7D8` / `#DCEFE3` | Safe dot / safe zone on bars and charts / safe status card |
-| `check` / `check-bg` | `#A86400` / `#FBEDD3` | Checking or restarting |
+| `water` / `water-deep` | `#0B4F8E` / `#08406F` | App hero and phone page ground, PWA theme / pressed states |
+| `on-water` / `on-water-2` | `#FFFFFF` / `#B9D3EC` | Text on water blue / secondary text on water blue |
+| `paper` / `ground-2` | `#FFFFFF` / `#F3F7FB` | Sheets and panels / desktop ground, notes |
+| `ink` / `ink2` / `faint` | `#0D1A26` / `#41505E` / `#5A6876` | Text, secondary text, labels |
+| `line` / `line-2` | `#DCE4EC` / `#E9EEF3` | Borders / row dividers |
+| `brand` / `brand-deep` / `brand-tint` | `#0A5CA8` / `#084B8A` / `#E1ECF7` | Links and primary buttons / hover / active navigation |
+| `safe` / `safe-band` | `#1D7F45` / `#CFE7D8` | Safe dot / safe range on bars |
+| `check` / `check-bg` | `#A86400` / `#FBEDD3` | Checking, restarting |
 | `unsafe` / `unsafe-bg` | `#C42B23` / `#F8DEDB` | Pump stopped, out of range marker |
-| `track` / `off` | `#E3E7EA` / `#8B969F` | Bar track / offline |
-
-No transparency anywhere, so every surface prints and exports to PDF cleanly.
+| `alarm` / `alarm-check` / `alarm-off` | `#B3261E` / `#8A5200` / `#33414E` | Solid hero alarm block: stopped / restarting or checking / offline |
+| `w-safe` / `w-check` / `w-unsafe` / `w-off` | `#5FD08C` / `#F5B94A` / `#FF7A70` / `#9FB3C6` | Dots on water blue, brighter so they hold contrast |
 
 ## Type
 
-- **IBM Plex Sans** 300 / 400 / 500 / 600. Light (300) only for live readings; semibold (600) for headings and buttons.
-- **IBM Plex Mono** only for timestamps in the event log and device details.
-- Tabular numbers everywhere (`font-variant-numeric: tabular-nums`) so readings do not jitter.
-- Headings use `text-wrap: balance`; body text uses `pretty`.
+- **IBM Plex Sans** 300 to 600. Light only for big live readings; semibold for headings and buttons.
+- **IBM Plex Mono** only for timeline times, the device key and the ingest address. A countdown keeps only the number in mono, never the unit.
+- Tabular numbers everywhere so readings do not jitter.
+
+## App frame
+
+- **Phone (under 900 px):** the page sits on water blue; a white sheet rises over it; a fixed bottom tab bar (Now, History, Alerts, Tests, Device). Calibration and Settings are reached from Device.
+- **Desktop (900 px and up):** a white sticky sidebar with all 7 pages and the demo footer, a light ground, and the water blue hero as one rounded card beside its chart.
+- Page head on the other pages: tank name with its status dot, source (Simulated or Real board), title, one sentence of purpose. On desktop it is a water blue band card, the same shape as the overview hero, so every page opens on the brand colour; panels sit below it as white cards, two side by side where they are short.
+
+## Virtual board
+
+The demo board runs on the server, not in the browser: each open page asks the database for the next reading every 2 s, and the database applies the same stop and restart rules as the firmware. Two people watching the shared demo tank therefore see the same state, the same countdown and one timeline. Simulated history is stored one reading a minute for the last day and one every 10 minutes before that, and the History page says so.
 
 ## Components
 
 | Component | File | Rules |
 |---|---|---|
-| Status dot | `components/ui.tsx` | 8 px dot, always followed by a word |
-| Button | `components/ui.tsx` | 44 px minimum height, 10 px radius, presses to 96% scale |
-| Range bar | `components/RangeBar.tsx` | pH linear 0 to 14, turbidity log 0.1 to 1000. Green safe band, limit ticks, ink marker that turns red only when out of range, slides 700 ms ease-out |
-| Line chart | `components/LineChart.tsx` | Last 6 minutes. Safe band fill, dashed limit lines, red columns while the pump was stopped |
-| Status card | `components/Portal.tsx` | One sentence title plus the reason. Order of priority: pump stopped, checking, back in range, safe |
-| Live chip | `components/LiveChip.tsx` | Hero badge on the website, marked "simulated" |
+| Hero | `components/app/Overview.tsx` | Tank, source, updated time; a solid alarm block only when not safe; Pump, Board and Last reading with dots; pH or turbidity chart with 1H to 30D |
+| Chart | `components/app/WaterChart.tsx` | Safe band fill, limit labels, red columns while the pump was off |
+| Range rows | `components/app/Overview.tsx` | Big light number, unit, bar with the safe band and an ink marker, dot plus word |
+| Timeline | `components/app/Overview.tsx`, `Alerts.tsx` | Mono time, dot, title, one line of why; Alerts groups by day with filter chips |
+| Panel | `app/app/app.css` `.panel` | 16 px radius, 1 px line, 22 to 26 px padding on desktop. Key value lists and single fields cap at 600 px wide |
+| Steps | `app/app/app.css` `.steps` | Numbered circles with a connector, for connecting the real board |
+| Buttons | `app/app/app.css` `.btn` | 44 px minimum, solid or ghost, disabled is solid grey, not faded |
+| Note | `app/app/app.css` `.note` | Ground-2 box with a bold lead, for honest limits |
 
-## Layout
+## Website
 
-- Website: max width about 72 rem, sticky top navigation, sections separated by space and hairline rules rather than boxes.
-- Portal on laptop: left sidebar with scroll-spy (Overview, Readings, Alarms, Test runs, Device).
-- Portal on phone: top bar plus a bottom tab bar (Now, History, Alerts, Tests, Device).
-- Tested at 390 px wide with no horizontal scroll.
+Max width about 72 rem, sticky top nav (Sign in and Live demo stay on one line; "Demo" under 640 px), sections separated by space and hairline rules. The hero is the real enclosure with one live reading marked simulated.
 
 ## Motion
 
-Only where it carries information: the range bar marker moving, button press feedback. Everything is disabled under `prefers-reduced-motion`.
+Only where it carries information: range bar marker, chart point, button press. Disabled under `prefers-reduced-motion`.
 
 ## Icons
 
-lucide-react at 16 to 18 px, stroke 1.75 to 2, always next to a text label.
+Line icons at 1.75 stroke in `components/app/icons.tsx` for the app, lucide-react on the website; always next to a word. PWA icon: a white drop with a water line on `#0B4F8E`.
+
+## Checked
+
+375, 390 and 430 px phones and 1440 desktop: no horizontal scroll, no console errors, states driven end to end (stopped, restarting, offline, test run matched, calibration saved).

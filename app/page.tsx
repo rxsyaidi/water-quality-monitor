@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { LiveChip } from "@/components/LiveChip";
 import { ButtonLink, Logo } from "@/components/ui";
 import { LIMITS, REPO_URL, phRange } from "@/lib/monitor";
@@ -47,7 +47,7 @@ const specs = [
 
 const runs = [
   { sample: "Tap water", why: "Inside both limits. The control.", expect: "Pump keeps running" },
-  { sample: "pH 9 buffer solution", why: `Above the pH ${LIMITS.ph.max} limit.`, expect: "Pump stops" },
+  { sample: "pH 9.18 buffer solution", why: `Above the pH ${LIMITS.ph.max} limit.`, expect: "Pump stops" },
   { sample: "Muddy water", why: `Above the ${LIMITS.ntu.max} NTU limit.`, expect: "Pump stops" },
 ];
 
@@ -58,7 +58,7 @@ export default function Home() {
     <div className="bg-card">
       <header className="sticky top-0 z-20 border-b border-line-2 bg-card">
         <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8" aria-label="Main">
-          <Link href="/" className="flex min-h-11 items-center gap-2 text-[15px] font-semibold">
+          <Link href="/" className="flex min-h-11 items-center gap-2 whitespace-nowrap text-[15px] font-semibold">
             <Logo />
             Water Quality Monitor
           </Link>
@@ -78,11 +78,18 @@ export default function Home() {
               </a>
             ))}
             <Link
-              href="/demo"
-              className="ml-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-sm font-semibold text-brand transition-colors duration-150 hover:text-brand-deep"
+              href="/login"
+              className="inline-flex min-h-11 items-center whitespace-nowrap rounded-lg px-2 text-sm text-ink-2 transition-colors duration-150 hover:text-ink sm:px-3"
             >
-              Live demo
-              <ArrowRight className="size-4" strokeWidth={2} aria-hidden="true" />
+              Sign in
+            </Link>
+            <Link
+              href="/demo"
+              prefetch={false}
+              className="inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-lg px-2 text-sm font-semibold text-brand transition-colors duration-150 hover:text-brand-deep sm:ml-2 sm:px-3"
+            >
+              <span className="hidden sm:inline">Live demo</span>
+              <span className="sm:hidden">Demo</span>
             </Link>
           </div>
         </nav>
@@ -101,9 +108,8 @@ export default function Home() {
               reading leaves the safe range.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink href="/demo">
+              <ButtonLink href="/demo" prefetch={false}>
                 Open the live demo
-                <ArrowRight className="size-4" strokeWidth={2} aria-hidden="true" />
               </ButtonLink>
               <ButtonLink href="#how" variant="secondary">
                 How it works
@@ -279,10 +285,10 @@ export default function Home() {
             </div>
             <Link
               href="/demo"
+              prefetch={false}
               className="inline-flex min-h-11 items-center gap-2 rounded-[10px] bg-white px-4 text-[15px] font-semibold text-ink transition-[background-color,transform] duration-150 ease-out hover:bg-brand-tint active:scale-[0.96]"
             >
               Open the live demo
-              <ArrowRight className="size-4" strokeWidth={2} aria-hidden="true" />
             </Link>
           </div>
         </section>

@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Comp B, Instrument tiles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Comp B: one instrument tile per sensor with a vertical gauge, on a pale water ground.
+   Primary reference Bevel health cards; Superpower band; Supabase service health grid. */
+:root{
+  --ground:#E4EEF7; --card:#FFFFFF; --ink:#0D1A26; --ink2:#41505E; --faint:#5A6876; --line:#D3DEE8;
+  --brand:#0A5CA8; --brand-deep:#073F75; --brand-tint:#D6E6F5;
+  --safe:#1D7F45; --safe-band:#BFE0CB; --check:#A86400; --unsafe:#C42B23;
+  --c-band:#E2F1E7; --c-grid:#D3DEE8; --c-axis:#5A6876; --c-line:#0A5CA8; --c-stop:#F3C9C5; --c-dotring:#FFFFFF;
+}
+*{box-sizing:border-box;margin:0}
+body{font-family:"IBM Plex Sans",system-ui,sans-serif;background:var(--ground);color:var(--ink);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.mono{font-family:"IBM Plex Mono",monospace}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+
+.head{padding:54px 20px 6px}
+.devrow{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--ink2)}
+.devrow b{display:flex;gap:4px;align-items:center;color:var(--ink);font-weight:600;font-size:15px}
+.head h1{font-size:32px;font-weight:600;letter-spacing:-.01em;margin-top:20px;display:flex;gap:12px;align-items:center}
+.head h1 .dot{width:12px;height:12px}
+.head p{font-size:15.5px;line-height:1.45;color:var(--ink2);margin-top:6px;text-wrap:pretty}
+
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:16px 16px 0}
+.tile{background:var(--card);border-radius:16px;padding:16px}
+.inst{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;min-height:178px}
+.inst .name{font-size:14.5px;font-weight:500}
+.inst .val{font-size:40px;font-weight:300;letter-spacing:-.02em;line-height:1;margin-top:18px}
+.inst .unit{font-size:14px;color:var(--faint);margin-top:4px;min-height:18px}
+.inst .state{display:flex;gap:7px;align-items:center;font-size:13.5px;color:var(--ink2);margin-top:auto}
+.inst .left{display:flex;flex-direction:column}
+.gauge{display:grid;grid-template-columns:auto auto;gap:6px;align-items:stretch}
+.gauge .scale{display:flex;flex-direction:column;justify-content:space-between;font-size:11px;color:var(--faint);text-align:right;padding:0 0 0}
+.rb{position:relative;width:10px;height:100%;min-height:146px;border-radius:5px;background:#E3E9EF}
+.rb-band{position:absolute;left:0;right:0;background:var(--safe-band);border-radius:2px}
+.rb-mark{position:absolute;left:-5px;width:20px;height:4px;margin-bottom:-2px;border-radius:2px;background:var(--ink)}
+
+.wide{grid-column:1 / -1}
+.pump{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.pump .k{font-size:14.5px;font-weight:500}
+.pump .v{font-size:22px;font-weight:400;margin-top:6px;white-space:nowrap}
+.pump .s{font-size:13.5px;color:var(--faint);margin-top:4px}
+.pumpstate{display:flex;gap:7px;align-items:center;font-size:14px;color:var(--ink2)}
+
+.health{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px}
+.health div{font-size:13px;color:var(--faint)}
+.health b{display:flex;gap:7px;align-items:center;font-size:14.5px;color:var(--ink);font-weight:500;margin-top:3px}
+.tileHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.tileHead h2{font-size:15.5px;font-weight:600}
+.tabs{display:flex;gap:16px;font-size:14px;color:var(--faint);font-weight:500}
+.tabs .on{color:var(--ink);box-shadow:inset 0 -2px 0 var(--brand);padding-bottom:4px}
+.seg{display:inline-flex;background:#E9EFF5;border-radius:9px;padding:3px}
+.seg span{font-size:12.5px;padding:4px 9px;border-radius:7px;color:var(--ink2);font-weight:500}
+.seg span.on{background:var(--brand);color:#fff}
+
+.events{list-style:none;padding:0}
+.events li{display:grid;grid-template-columns:46px 1fr;gap:10px;padding:11px 0;border-top:1px solid #E6ECF2}
+.events li:first-child{border-top:0;padding-top:2px}
+.events time{font-size:12.5px;color:var(--faint);padding-top:2px}
+.events .what{font-size:14.5px;display:flex;gap:8px;align-items:center}
+.events .what+span{display:block;font-size:13px;color:var(--faint);margin-top:2px}
+.simnote{font-size:12.5px;color:var(--faint);padding:16px 20px 110px;text-align:center}
+
+.side,.topbar{display:none}
+.tabbar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 6px 26px}
+.tb{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;color:var(--faint);font-weight:500;min-width:58px}
+.tb.on{color:var(--brand)}
+
+@media (min-width:900px){
+  .app{display:grid;grid-template-columns:236px minmax(0,1fr)}
+  .side{display:flex;flex-direction:column;background:#F6F9FC;border-right:1px solid var(--line);min-height:100vh;padding:18px 12px}
+  .brandmark{display:flex;gap:10px;align-items:center;font-weight:600;font-size:15px;padding:4px 8px 22px}
+  .brandmark i{width:28px;height:28px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center}
+  .sn{display:flex;gap:11px;align-items:center;padding:9px 10px;border-radius:8px;font-size:14.5px;color:var(--ink2);font-weight:500}
+  .sn.on{background:var(--brand-tint);color:var(--brand-deep)}
+  .tabbar{display:none}
+  .main{min-width:0;padding:0 32px}
+  .head{padding:28px 0 4px;display:flex;justify-content:space-between;align-items:end}
+  .head .devrow{display:none}
+  .head h1{margin-top:0;font-size:34px}
+  .head .right{display:flex;gap:18px;align-items:center;font-size:14px;color:var(--ink2)}
+  .grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;padding:20px 0 0}
+  .wide{grid-column:auto}
+  .chart{grid-column:1 / span 3}
+  .ev{grid-column:4}
+  .simnote{text-align:left;padding:14px 0 40px}
+  .pump .v{font-size:19px}
+}
+@media (max-width:899px){ .head .right{display:none} }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brandmark"><i data-icon="drop" data-size="16"></i>Water Quality Monitor</div>
+    <nav data-sidenav></nav>
+  </aside>
+  <div class="main">
+    <header class="head">
+      <div>
+        <div class="devrow"><b>Tank 1 <span data-icon="chevron" data-size="16"></span></b><span>Simulated readings</span></div>
+        <h1><i class="dot" style="background:var(--safe)"></i>Safe to use</h1>
+        <p>Pump running. Last stop yesterday 14:32, for 9 min.</p>
+      </div>
+      <div class="right"><span>Tank 1, simulated readings</span><span>Updated 2 s ago</span></div>
+    </header>
+
+    <div class="grid">
+      <div class="tile inst">
+        <div class="left">
+          <span class="name">pH</span>
+          <span class="val">7.21</span>
+          <span class="unit">Safe 6.5 to 8.5</span>
+          <span class="state"><i class="dot" style="background:var(--safe)"></i>In range</span>
+        </div>
+        <div class="gauge"><div class="scale"><span>14</span><span>0</span></div><div data-bar="ph" data-vertical></div></div>
+      </div>
+      <div class="tile inst">
+        <div class="left">
+          <span class="name">Turbidity</span>
+          <span class="val">1.8</span>
+          <span class="unit">NTU, max 5</span>
+          <span class="state"><i class="dot" style="background:var(--safe)"></i>Clear</span>
+        </div>
+        <div class="gauge"><div class="scale"><span>1000</span><span>10</span><span>0.1</span></div><div data-bar="ntu" data-vertical></div></div>
+      </div>
+      <div class="tile wide">
+        <div class="pump">
+          <div><div class="k">Pump</div><div class="v">Running 19 h 59 m</div><div class="s">Restarted yesterday 14:41</div></div>
+          <span class="pumpstate"><i class="dot" style="background:var(--safe)"></i>On</span>
+        </div>
+      </div>
+      <div class="tile wide">
+        <div class="health">
+          <div>Board<b><i class="dot" style="background:var(--safe)"></i>Online</b></div>
+          <div>Wi-Fi<b>Strong</b></div>
+          <div>Last reading<b>2 s ago</b></div>
+          <div>Cloud<b><i class="dot" style="background:var(--safe)"></i>Synced</b></div>
+        </div>
+      </div>
+      <div class="tile wide chart">
+        <div class="tileHead"><div class="tabs"><span class="on">pH</span><span>Turbidity</span></div><div class="seg"><span>1H</span><span class="on">24H</span><span>7D</span><span>30D</span></div></div>
+        <div data-chart="ph" data-h="200"></div>
+      </div>
+      <div class="tile wide ev">
+        <div class="tileHead"><h2>Recent alerts</h2></div>
+        <ol class="events">
+          <li><time class="mono">14:41</time><div><span class="what"><i class="dot" style="background:var(--safe)"></i>Pump restarted</span><span>Back in range for 30 s</span></div></li>
+          <li><time class="mono">14:32</time><div><span class="what"><i class="dot" style="background:var(--unsafe)"></i>Pump stopped</span><span>pH 9.02, above 8.5</span></div></li>
+          <li><time class="mono">14:32</time><div><span class="what"><i class="dot" style="background:var(--check)"></i>Checking</span><span>Confirming for 2 s</span></div></li>
+        </ol>
+      </div>
+    </div>
+    <p class="simnote">Simulated readings from the virtual board. Real readings appear once the board is connected.</p>
+  </div>
+</div>
+<nav class="tabbar" data-tabbar></nav>
+<script src="shared.js"></script>
+</body>
+</html>
